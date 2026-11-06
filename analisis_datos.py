@@ -1,6 +1,9 @@
+
 import pandas as pd
 from datasets import load_dataset
 from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import f1_score
 
 # 1. Identificación del proyecto
 print("=" * 60)
@@ -35,7 +38,6 @@ print(f"Valores faltantes: {df.isnull().sum().sum()}")
 print(f"Registros duplicados: {df.duplicated().sum()}")
 
 # 5. Separar las características y la variable objetivo
-# La columna price no se utilizará como característica predictora.
 X = df.drop(columns=["price"])
 precio = df["price"]
 
@@ -67,12 +69,90 @@ y_test = (precio_test >= mediana_precio).astype(int)
 print("\n--- DISTRIBUCION DE LAS CATEGORIAS ---")
 print("Entrenamiento:")
 print(y_train.value_counts().sort_index().rename(
-    index={0: "Por debajo de la mediana", 1: "Igual o por encima de la mediana"}
+    index={
+        0: "Por debajo de la mediana",
+        1: "Igual o por encima de la mediana"
+    }
 ))
 
 print("\nPrueba:")
 print(y_test.value_counts().sort_index().rename(
-    index={0: "Por debajo de la mediana", 1: "Igual o por encima de la mediana"}
+    index={
+        0: "Por debajo de la mediana",
+        1: "Igual o por encima de la mediana"
+    }
 ))
 
-print("\nPreparación y división de los datos completadas correctamente.")
+# 9. Separar una parte del entrenamiento para validar el modelo
+X_entrenamiento, X_validacion, y_entrenamiento, y_validacion = train_test_split(
+    X_train,
+    y_train,
+    test_size=0.20,
+    random_state=42,
+    stratify=y_train
+)
+
+# 10. Comparar diferentes profundidades del árbol
+print("\n--- SELECCION DE LA PROFUNDIDAD DEL ARBOL ---")
+
+profundidades = [3, 5, 7, 10, None]
+mejor_f1 = -1
+mejor_profundidad = None
+
+for profundidad in profundidades:
+    modelo_prueba = DecisionTreeClassifier(
+        max_depth=profundidad,
+        random_state=42
+    )
+
+    modelo_prueba.fit(X_entrenamiento, y_entrenamiento)
+
+    predicciones_validacion = modelo_prueba.predict(X_validacion)
+
+    resultado_f1 = f1_score(
+        y_validacion,
+        predicciones_validacion
+    )
+
+    print(
+        f"Profundidad: {profundidad} | "
+        f"F1: {resultado_f1:.4f}"
+    )
+
+    if resultado_f1 > mejor_f1:
+        mejor_f1 = resultado_f1
+        mejor_profundidad = profundidad
+
+print(f"\nMejor profundidad seleccionada: {mejor_profundidad}")
+print(f"Mejor F1 en validación: {mejor_f1:.4f}")
+
+# 11. Entrenar el modelo definitivo con todos los datos de entrenamiento
+print("\n--- ENTRENAMIENTO DEL MODELO DEFINITIVO ---")
+
+modelo = DecisionTreeClassifier(
+    max_depth=mejor_profundidad,
+    random_state=42
+)
+
+modelo.fit(X_train, y_train)
+
+print("Modelo entrenado correctamente.")
+print(f"Profundidad real del árbol: {modelo.get_depth()}")
+print(f"Número de hojas: {modelo.get_n_leaves()}")
+
+# 12. Mostrar las características más importantes
+print("\n--- IMPORTANCIA DE LAS CARACTERISTICAS ---")
+
+importancias = pd.DataFrame({
+    "Caracteristica": X.columns,
+    "Importancia": modelo.feature_importances_
+})
+
+importancias = importancias.sort_values(
+    by="Importancia",
+    ascending=False
+)
+
+print(importancias.to_string(index=False))
+
+print("\nImplementación y entrenamiento del modelo completados.")
