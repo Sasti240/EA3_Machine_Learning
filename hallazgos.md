@@ -20,14 +20,20 @@ Se utilizaron 17 características predictoras. La columna `price` se reservó pa
 
 ## 3. Preparación de los datos
 
-Los registros se dividieron en un 80 % para entrenamiento y un 20 % para prueba.
+La exploración inicial mostró un DataFrame de 21613 filas y 18 columnas. Se revisaron los nombres de las columnas, los tipos de datos y los primeros cinco registros.
 
-La mediana se calculó únicamente con los precios del conjunto de entrenamiento, cuyo valor fue **13.017005**.
+No se encontraron valores faltantes ni registros duplicados, por lo que no fue necesario eliminar filas. Las dimensiones se conservaron después de la revisión.
+
+Se separó la columna `price` de las 17 características predictoras. Los registros se dividieron en un 80 % para entrenamiento y un 20 % para prueba.
+
+La mediana se calculó únicamente con los precios del conjunto de entrenamiento, cuyo valor fue **13.017005**. De esta manera, el conjunto de prueba no intervino en la definición del umbral.
 
 Se definieron dos categorías:
 
 - **Clase 0:** viviendas con precio por debajo de la mediana.
 - **Clase 1:** viviendas con precio igual o superior a la mediana.
+
+No se aplicó escalado ni estandarización, porque el árbol de decisión trabaja mediante condiciones de división sobre los valores de las características y no necesita que estén en una escala común.
 
 ## 4. Modelo utilizado
 
@@ -79,6 +85,13 @@ Los resultados muestran que la ubicación geográfica y el tamaño del área hab
 El modelo alcanzó un F1-score de **0.8869** en los datos de prueba, lo que refleja un equilibrio entre la precisión y la capacidad de identificar viviendas de la categoría positiva.
 
 Esta información puede servir como apoyo inicial para compradores e inversionistas que quieran identificar viviendas que merezcan una evaluación más detallada.
+
+### Recomendaciones prácticas
+
+- Utilizar la ubicación geográfica y el área habitable como criterios iniciales para organizar y comparar las viviendas identificadas por el modelo.
+- Revisar las características de las propiedades similares en la misma zona antes de considerar una compra o inversión.
+- Comprobar el estado físico, la documentación, los costos asociados y las condiciones reales de cada inmueble antes de tomar una decisión.
+- Utilizar la clasificación como un filtro inicial y no como garantía de que una vivienda representa una oportunidad rentable.
 
 ## 7. Limitaciones
 

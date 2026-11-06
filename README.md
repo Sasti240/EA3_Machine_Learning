@@ -1,4 +1,4 @@
-# Clasificación de viviendas mediante Machine Learning
+# Aprendizaje supervisado y no supervisado
 
 ## Integrantes
 
@@ -30,28 +30,73 @@ Se desarrolló un modelo de clasificación mediante un árbol de decisión, util
 
 El conjunto de datos contiene información de viviendas de King County, Washington, Estados Unidos. Incluye características como habitaciones, baños, superficie, ubicación, año de construcción y precio.
 
-## Preparación de los datos
+**Justificación de la elección del dataset**
 
-Durante la revisión inicial se encontraron:
+Este conjunto de datos es adecuado para la pregunta de negocio porque contiene información sobre las características físicas y geográficas de las viviendas, además de su precio. Esto permite analizar qué variables tienen mayor relevancia para distinguir las viviendas cuyo precio se encuentra por encima de la mediana.
 
-- 0 valores faltantes.
-- 0 registros duplicados.
-- 17 características predictoras.
+## Exploración y preparación de los datos
 
-Los datos se dividieron en un 80 % para entrenamiento y un 20 % para prueba.
+Durante la exploración inicial se obtuvo la siguiente información:
 
-La mediana se calculó únicamente con los precios del conjunto de entrenamiento, obteniendo un valor de `13.017005`.
+- Dimensiones del DataFrame: 21.613 filas y 18 columnas.
+- Tipos de datos: enteros (`int64`) y decimales (`float64`).
+- Se visualizaron los nombres de las columnas y los primeros cinco registros.
+- Valores faltantes: 0.
+- Registros duplicados: 0.
+- Características predictoras: 17.
+
+Como no se encontraron valores faltantes ni registros duplicados, no fue necesario eliminar información. Las dimensiones del DataFrame se conservaron después de la revisión.
+
+Las 17 características predictoras utilizadas fueron:
+
+`bedrooms`, `bathrooms`, `sqft_living`, `sqft_lot`, `waterfront`, `grade`, `sqft_above`, `sqft_basement`, `yr_built`, `yr_renovated`, `lat`, `long`, `sqft_living15`, `sqft_lot15`, `date_year`, `date_month` y `date_day`.
+
+### División de los datos
+
+Los datos se dividieron en:
+
+- **80 % para entrenamiento:** 17.290 registros.
+- **20 % para prueba:** 4.323 registros.
+
+La mediana se calculó únicamente con los precios del conjunto de entrenamiento, obteniendo un valor de `13.017005`. Esto evita utilizar información del conjunto de prueba para definir el umbral de clasificación.
 
 Se construyó una variable objetivo con dos categorías:
 
 - **Clase 0:** viviendas con precio por debajo de la mediana.
 - **Clase 1:** viviendas con precio igual o superior a la mediana.
 
-La columna `price` se utilizó para construir la variable objetivo y fue excluida de las características predictoras.
+La columna `price` se utilizó para construir la variable objetivo y fue excluida de las características predictoras, evitando que el modelo utilice directamente el precio para realizar sus predicciones.
+
+### Escalado de variables
+
+No se aplicó normalización ni estandarización a las características. Esto se debe a que los árboles de decisión realizan divisiones mediante condiciones sobre los valores de las variables y no dependen de que todas tengan una escala similar.
+
+Por esta razón, se conservaron los valores originales del conjunto de datos.
 
 ## Modelo de Machine Learning
 
 Se implementó un modelo de aprendizaje supervisado mediante un árbol de decisión de clasificación (`DecisionTreeClassifier`).
+
+### Funcionamiento del árbol de decisión
+
+El algoritmo clasifica las viviendas mediante una serie de condiciones que se organizan en forma de árbol. Su funcionamiento se puede resumir en los siguientes pasos:
+
+1. Analiza las características disponibles para encontrar divisiones que permitan separar las categorías de precio.
+2. Selecciona las condiciones que mejor separan los registros en cada nodo.
+3. Continúa realizando divisiones hasta alcanzar la profundidad establecida o cumplir otros criterios de parada.
+4. En los nodos finales, llamados hojas, asigna una categoría según los registros que llegaron a cada uno.
+5. Utiliza las condiciones aprendidas durante el entrenamiento para clasificar nuevas viviendas.
+
+### Parámetros y configuración
+
+Se utilizaron los siguientes parámetros principales:
+
+| Parámetro | Valor | Descripción |
+|---|---|---|
+| `max_depth` | 10 | Limita la profundidad máxima del árbol. |
+| `random_state` | 42 | Permite mantener la reproducibilidad de los resultados. |
+| `test_size` | 0.20 | Reserva el 20 % de los datos para prueba. |
+| `validation_size` | 0.20 | Reserva el 20 % del entrenamiento para validación. |
 
 Se compararon las siguientes profundidades máximas:
 
@@ -59,11 +104,37 @@ Se compararon las siguientes profundidades máximas:
 - 5
 - 7
 - 10
-- Sin límite
+- Sin límite (`None`)
+
+La comparación se realizó utilizando el F1-score del conjunto de validación.
+
+| Profundidad | F1-score de validación |
+|---|---:|
+| 3 | 0.8306 |
+| 5 | 0.8758 |
+| 7 | 0.8851 |
+| 10 | 0.8879 |
+| Sin límite | 0.8626 |
 
 La configuración seleccionada fue una profundidad máxima de 10, con un F1-score de validación de `0.8879`.
 
-El modelo definitivo se entrenó utilizando todos los datos de entrenamiento y posteriormente se evaluó con el conjunto de prueba.
+El modelo definitivo se entrenó utilizando todos los datos de entrenamiento y posteriormente se evaluó con el conjunto de prueba. El árbol obtenido alcanzó una profundidad real de 10 y 490 hojas.
+
+### Ventajas y limitaciones del algoritmo
+
+**Ventajas:**
+
+- Permite trabajar con variables numéricas sin necesidad de escalarlas.
+- Es relativamente sencillo de interpretar.
+- Permite identificar qué características tienen mayor importancia para las decisiones del modelo.
+- Puede representar relaciones no lineales entre las variables.
+
+**Limitaciones:**
+
+- Puede presentar sobreajuste si alcanza una profundidad excesiva.
+- Pequeños cambios en los datos pueden modificar la estructura del árbol.
+- La importancia de las características no demuestra relaciones de causa y efecto.
+- Su capacidad de generalización depende de la calidad y representatividad de los datos utilizados.
 
 ## Resultados
 
@@ -77,6 +148,19 @@ El modelo obtuvo los siguientes resultados sobre los datos de prueba:
 | F1-score | 0.8869 |
 
 La exactitud alcanzada fue del **88.46 %**.
+
+### Interpretación de las métricas
+
+- **Accuracy:** indica que el modelo clasificó correctamente el 88.46 % de las viviendas del conjunto de prueba.
+- **Precision:** de las viviendas clasificadas como iguales o superiores a la mediana, el 89.23 % realmente pertenecían a esa categoría.
+- **Recall:** el modelo identificó correctamente el 88.15 % de las viviendas que realmente estaban en la categoría igual o superior a la mediana.
+- **F1-score:** combina precisión y recall, obteniendo un resultado de 0.8869.
+
+Las dos categorías tienen una cantidad de registros relativamente equilibrada en el conjunto de prueba: 2.104 viviendas por debajo de la mediana y 2.219 iguales o superiores. Por eso, además de la exactitud, se utiliza el F1-score para evaluar el equilibrio entre precisión y capacidad de identificación.
+
+En este problema, los falsos positivos representan viviendas que el modelo clasifica como iguales o superiores a la mediana cuando realmente están por debajo. Los falsos negativos representan viviendas de precio igual o superior a la mediana que el modelo no logra identificar.
+
+Ambos errores son importantes para la decisión de compra o inversión, por lo que resulta conveniente analizar conjuntamente precisión y recall.
 
 ### Características más importantes
 
@@ -108,7 +192,9 @@ Los resultados muestran que la ubicación geográfica y el tamaño del área hab
 
 El modelo alcanzó un F1-score de `0.8869` en los datos de prueba, mostrando un buen equilibrio entre precisión y capacidad de identificación de la categoría positiva.
 
-Estos resultados pueden servir como apoyo inicial para orientar la búsqueda y evaluación de posibles oportunidades inmobiliarias. Sin embargo, la importancia de las características no demuestra una relación de causa y efecto, y el modelo no calcula precios de venta ni sustituye una valoración profesional.
+Estos resultados pueden servir como apoyo inicial para orientar la búsqueda y evaluación de posibles oportunidades inmobiliarias. Por ejemplo, se pueden revisar con mayor atención la ubicación y el área habitable de las viviendas identificadas por el modelo, y posteriormente contrastar sus características con las condiciones reales del inmueble y del mercado.
+
+Sin embargo, la importancia de las características no demuestra una relación de causa y efecto, y el modelo no calcula precios de venta ni sustituye una valoración profesional.
 
 Para consultar el análisis completo, se puede revisar el archivo [hallazgos.md](hallazgos.md).
 
@@ -149,7 +235,7 @@ Para ejecutar el proyecto localmente, se deben seguir estos pasos:
 **1. Clonar el repositorio**
 
 ```bash
-git clone https://github.com/Sasti240/EA3_Machine_Learning
+git clone https://github.com/Sasti240/EA3_Machine_Learning.git
 ```
 
 **2. Ingresar a la carpeta del proyecto**
@@ -206,10 +292,14 @@ El flujo realiza automáticamente las siguientes tareas:
 1. Descarga el repositorio.
 2. Configura Python 3.11.
 3. Instala las dependencias.
-4. Ejecuta el análisis y entrenamiento del modelo.
-5. Guarda los archivos generados como artefactos descargables.
+4. Descarga el dataset desde Hugging Face y ejecuta el análisis.
+5. Realiza la exploración y preparación de los datos.
+6. Entrena y evalúa el modelo.
+7. Guarda los archivos generados como artefactos descargables.
 
 Los resultados pueden consultarse desde la pestaña **Actions** del repositorio, seleccionando una ejecución y descargando el artefacto `resultados-machine-learning`.
+
+**Repositorio:** https://github.com/Sasti240/EA3_Machine_Learning
 
 ## Estado del proyecto
 

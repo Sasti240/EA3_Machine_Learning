@@ -12,11 +12,29 @@ Repositorio: inria-soda/tabular-benchmark
 Archivo: reg_cat/house_sales.csv
 Registros: 21613
 Columnas originales: 18
+Dimensiones iniciales: (21613, 18)
+Dimensiones despues de la revision: (21613, 18)
 
 REVISION Y PREPARACION
 Valores faltantes: 0
 Registros duplicados: 0
+No se eliminaron registros porque no se encontraron valores faltantes ni duplicados.
+Dimensiones iniciales: (21613, 18)
+Dimensiones despues de la revision: (21613, 18)
+
 Caracteristicas predictoras: 17
+Nombres de las caracteristicas:
+bedrooms, bathrooms, sqft_living, sqft_lot, waterfront, grade, sqft_above, sqft_basement, yr_built, yr_renovated, lat, long, sqft_living15, sqft_lot15, date_year, date_month, date_day
+
+OPERACIONES DE PREPROCESAMIENTO
+1. Se revisaron las dimensiones, columnas, tipos de datos y primeros cinco registros.
+2. Se verificaron valores faltantes y registros duplicados; no fue necesario eliminar filas.
+3. Se separo la columna price de las 17 caracteristicas predictoras.
+4. Se dividieron los datos en 80 % para entrenamiento y 20 % para prueba.
+5. La mediana se calculo solamente con los precios del conjunto de entrenamiento.
+6. Se creo la variable objetivo binaria a partir de esa mediana.
+7. No se aplico escalado porque los arboles de decision realizan divisiones mediante condiciones sobre los valores y no requieren que las variables tengan una escala comun.
+
 Registros de entrenamiento: 17290
 Registros de prueba: 4323
 Mediana calculada en entrenamiento: 13.017005
@@ -24,11 +42,15 @@ Mediana calculada en entrenamiento: 13.017005
 VARIABLE OBJETIVO
 Clase 0: Precio por debajo de la mediana.
 Clase 1: Precio igual o superior a la mediana.
+La columna price se utilizo para crear la variable objetivo y se excluyo de las caracteristicas predictoras.
 
 MODELO
 Tipo de aprendizaje: Supervisado.
 Problema: Clasificacion binaria.
 Algoritmo: Arbol de decision (DecisionTreeClassifier).
+Parametro max_depth: 10
+Parametro random_state: 42
+Validacion: 20 % del conjunto de entrenamiento.
 Semilla aleatoria: 42
 
 COMPARACION DE PROFUNDIDADES

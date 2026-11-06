@@ -45,8 +45,20 @@ dataset = load_dataset(
 # 3. Convertir los datos a un DataFrame de Pandas
 df = dataset.to_pandas()
 
-print(f"Registros: {df.shape[0]}")
-print(f"Columnas: {df.shape[1]}")
+# Guardar las dimensiones iniciales
+dimensiones_iniciales = df.shape
+
+print("\n--- EXPLORACION DEL DATAFRAME ---")
+print(f"Dimensiones del DataFrame: {df.shape}")
+
+print("\nColumnas:")
+print(df.columns.tolist())
+
+print("\nTipos de datos:")
+print(df.dtypes)
+
+print("\nPrimeros cinco registros:")
+print(df.head())
 
 # 4. Revisar la calidad de los datos
 print("\n--- REVISION DE LOS DATOS ---")
@@ -56,6 +68,13 @@ duplicados = int(df.duplicated().sum())
 
 print(f"Valores faltantes: {valores_faltantes}")
 print(f"Registros duplicados: {duplicados}")
+
+# No se eliminan registros porque no se encontraron
+# valores faltantes ni registros duplicados.
+dimensiones_finales = df.shape
+
+print(f"\nDimensiones iniciales: {dimensiones_iniciales}")
+print(f"Dimensiones después de la revisión: {dimensiones_finales}")
 
 # 5. Separar las características y la variable objetivo
 X = df.drop(columns=["price"])
@@ -326,11 +345,29 @@ Repositorio: inria-soda/tabular-benchmark
 Archivo: reg_cat/house_sales.csv
 Registros: {df.shape[0]}
 Columnas originales: {df.shape[1]}
+Dimensiones iniciales: {dimensiones_iniciales}
+Dimensiones despues de la revision: {dimensiones_finales}
 
 REVISION Y PREPARACION
 Valores faltantes: {valores_faltantes}
 Registros duplicados: {duplicados}
+No se eliminaron registros porque no se encontraron valores faltantes ni duplicados.
+Dimensiones iniciales: {dimensiones_iniciales}
+Dimensiones despues de la revision: {dimensiones_finales}
+
 Caracteristicas predictoras: {X.shape[1]}
+Nombres de las caracteristicas:
+{", ".join(X.columns.tolist())}
+
+OPERACIONES DE PREPROCESAMIENTO
+1. Se revisaron las dimensiones, columnas, tipos de datos y primeros cinco registros.
+2. Se verificaron valores faltantes y registros duplicados; no fue necesario eliminar filas.
+3. Se separo la columna price de las 17 caracteristicas predictoras.
+4. Se dividieron los datos en 80 % para entrenamiento y 20 % para prueba.
+5. La mediana se calculo solamente con los precios del conjunto de entrenamiento.
+6. Se creo la variable objetivo binaria a partir de esa mediana.
+7. No se aplico escalado porque los arboles de decision realizan divisiones mediante condiciones sobre los valores y no requieren que las variables tengan una escala comun.
+
 Registros de entrenamiento: {len(X_train)}
 Registros de prueba: {len(X_test)}
 Mediana calculada en entrenamiento: {mediana_precio:.6f}
@@ -338,11 +375,15 @@ Mediana calculada en entrenamiento: {mediana_precio:.6f}
 VARIABLE OBJETIVO
 Clase 0: Precio por debajo de la mediana.
 Clase 1: Precio igual o superior a la mediana.
+La columna price se utilizo para crear la variable objetivo y se excluyo de las caracteristicas predictoras.
 
 MODELO
 Tipo de aprendizaje: Supervisado.
 Problema: Clasificacion binaria.
 Algoritmo: Arbol de decision (DecisionTreeClassifier).
+Parametro max_depth: {mejor_profundidad}
+Parametro random_state: 42
+Validacion: 20 % del conjunto de entrenamiento.
 Semilla aleatoria: 42
 
 COMPARACION DE PROFUNDIDADES
@@ -412,14 +453,20 @@ Se utilizaron {X.shape[1]} características predictoras. La columna `price` se r
 
 ## 3. Preparación de los datos
 
-Los registros se dividieron en un 80 % para entrenamiento y un 20 % para prueba.
+La exploración inicial mostró un DataFrame de {dimensiones_iniciales[0]} filas y {dimensiones_iniciales[1]} columnas. Se revisaron los nombres de las columnas, los tipos de datos y los primeros cinco registros.
 
-La mediana se calculó únicamente con los precios del conjunto de entrenamiento, cuyo valor fue **{mediana_precio:.6f}**.
+No se encontraron valores faltantes ni registros duplicados, por lo que no fue necesario eliminar filas. Las dimensiones se conservaron después de la revisión.
+
+Se separó la columna `price` de las 17 características predictoras. Los registros se dividieron en un 80 % para entrenamiento y un 20 % para prueba.
+
+La mediana se calculó únicamente con los precios del conjunto de entrenamiento, cuyo valor fue **{mediana_precio:.6f}**. De esta manera, el conjunto de prueba no intervino en la definición del umbral.
 
 Se definieron dos categorías:
 
 - **Clase 0:** viviendas con precio por debajo de la mediana.
 - **Clase 1:** viviendas con precio igual o superior a la mediana.
+
+No se aplicó escalado ni estandarización, porque el árbol de decisión trabaja mediante condiciones de división sobre los valores de las características y no necesita que estén en una escala común.
 
 ## 4. Modelo utilizado
 
@@ -467,6 +514,13 @@ Los resultados muestran que la ubicación geográfica y el tamaño del área hab
 El modelo alcanzó un F1-score de **{f1:.4f}** en los datos de prueba, lo que refleja un equilibrio entre la precisión y la capacidad de identificar viviendas de la categoría positiva.
 
 Esta información puede servir como apoyo inicial para compradores e inversionistas que quieran identificar viviendas que merezcan una evaluación más detallada.
+
+### Recomendaciones prácticas
+
+- Utilizar la ubicación geográfica y el área habitable como criterios iniciales para organizar y comparar las viviendas identificadas por el modelo.
+- Revisar las características de las propiedades similares en la misma zona antes de considerar una compra o inversión.
+- Comprobar el estado físico, la documentación, los costos asociados y las condiciones reales de cada inmueble antes de tomar una decisión.
+- Utilizar la clasificación como un filtro inicial y no como garantía de que una vivienda representa una oportunidad rentable.
 
 ## 7. Limitaciones
 
