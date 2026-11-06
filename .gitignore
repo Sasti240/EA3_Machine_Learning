@@ -1,0 +1,26 @@
+
+# Entorno virtual de Python
+.venv/
+venv/
+env/
+
+# Archivos temporales de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Configuracion local y variables de entorno
+.env
+.env.*
+
+# Archivos temporales de Jupyter
+.ipynb_checkpoints/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Configuracion local de editores
+.vscode/
+.idea/
