@@ -1,0 +1,69 @@
+============================================================
+RESUMEN DEL PROYECTO DE MACHINE LEARNING - EA3
+============================================================
+
+Fecha de ejecucion: 06/11/2026
+
+PREGUNTA DE NEGOCIO
+¿Qué características permiten identificar viviendas cuyo precio está por encima de la mediana del mercado?
+
+DATASET
+Repositorio: inria-soda/tabular-benchmark
+Archivo: reg_cat/house_sales.csv
+Registros: 21613
+Columnas originales: 18
+
+REVISION Y PREPARACION
+Valores faltantes: 0
+Registros duplicados: 0
+Caracteristicas predictoras: 17
+Registros de entrenamiento: 17290
+Registros de prueba: 4323
+Mediana calculada en entrenamiento: 13.017005
+
+VARIABLE OBJETIVO
+Clase 0: Precio por debajo de la mediana.
+Clase 1: Precio igual o superior a la mediana.
+
+MODELO
+Tipo de aprendizaje: Supervisado.
+Problema: Clasificacion binaria.
+Algoritmo: Arbol de decision (DecisionTreeClassifier).
+Semilla aleatoria: 42
+
+COMPARACION DE PROFUNDIDADES
+Profundidad: 3 | F1: 0.8306
+Profundidad: 5 | F1: 0.8758
+Profundidad: 7 | F1: 0.8851
+Profundidad: 10 | F1: 0.8879
+Profundidad: None | F1: 0.8626
+
+Profundidad seleccionada: 10
+F1 de validacion: 0.8879
+Profundidad real: 10
+Numero de hojas: 490
+
+METRICAS DE EVALUACION
+Accuracy: 0.8846
+Precision: 0.8923
+Recall: 0.8815
+F1-score: 0.8869
+
+MATRIZ DE CONFUSION
+[[1868  236]
+ [ 263 1956]]
+
+CARACTERISTICAS MAS IMPORTANTES
+Caracteristica  Importancia
+           lat     0.474979
+   sqft_living     0.287865
+         grade     0.052670
+          long     0.048484
+ sqft_living15     0.028916
+
+ARCHIVOS GENERADOS
+- matriz_confusion.png
+- importancia_caracteristicas.png
+- resumen.txt
+- hallazgos.md
+============================================================
